@@ -3,6 +3,7 @@ import db from "../db/db.js";
 
 const Productos = () => {
   const [carrito, setCarrito] = useState([]);
+  const [cantidad, setCantidad] = useState([]);
 
   const handleAgregar = (e) => {
     e.preventDefault();
@@ -11,7 +12,20 @@ const Productos = () => {
     setCarrito([...carrito, ...prodCar]);
   };
 
+  const acumulado = carrito.map((i) => i.id);
+
+  const carritoUnicos = [...new Set([...carrito])];
+
   const total = carrito.map((t) => t.precio);
+
+  const handleMas = (e) => {
+    e.preventDefault();
+    setCantidad([...cantidad, Number(...e.target.value)]);
+  };
+
+  const handleMenos = (e) => {
+    e.preventDefault();
+  };
 
   return (
     <div>
@@ -51,10 +65,12 @@ const Productos = () => {
               <th scope="col">Nombre</th>
               <th scope="col">Precio</th>
               <th scope="col">Descripcion</th>
+              <th scope="col">Cantidad</th>
+              <th scope="col">Comprar Und</th>
             </tr>
           </thead>
-          {carrito &&
-            carrito?.map((e, i) => {
+          {carritoUnicos &&
+            carritoUnicos?.map((e, i) => {
               return (
                 <tbody key={i}>
                   <tr className="table-primary">
@@ -62,6 +78,23 @@ const Productos = () => {
                     <td>{e.nombre}</td>
                     <td>{e.precio}</td>
                     <td>{e.descripcion}</td>
+                    <td>
+                      <button value={e.id} onClick={(e) => handleMenos(e)}>
+                        -
+                      </button>
+                      <button>
+                        {
+                          acumulado.concat(cantidad).filter((i) => i === e.id)
+                            .length
+                        }
+                      </button>
+                      <button value={e.id} onClick={(e) => handleMas(e)}>
+                        +
+                      </button>
+                    </td>
+                    <td>
+                      <button>Comprar</button>
+                    </td>
                   </tr>
                 </tbody>
               );
