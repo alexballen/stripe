@@ -1,4 +1,5 @@
 import React from "react";
+import db from "../db/db.js";
 
 const Carrito = () => {
   return (
