@@ -1,5 +1,6 @@
 const express = require("express");
 const morgan = require("morgan");
+const routes = require("./src/routes/index.js");
 
 const server = express();
 
@@ -15,6 +16,8 @@ server.use((req, res, next) => {
   res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
   next();
 });
+
+server.use("/", routes);
 
 server.listen(3001, () => {
   console.log("Servidor levantado en el puerto 3001");
