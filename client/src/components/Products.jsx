@@ -1,13 +1,35 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { allProducts } from "../redux/actions/products.js";
+import {
+  addShoppingCart,
+  /* allShoppingCart, */
+} from "../redux/actions/shoppingCart.js";
 import db from "../db/db.js";
+import Stripe from "./Stripe";
 
-const Productos = () => {
+const Products = () => {
+  const dispatch = useDispatch();
+  const { products } = useSelector((state) => state.products);
+  console.log(products);
+  const { addCartS } = useSelector((state) => state.addCartS);
+  console.log(addCartS);
+  const { cartP } = useSelector((state) => state.cartP);
+  console.log(cartP);
+
+  useEffect(() => {
+    dispatch(allProducts(db));
+    //dispatch(allShoppingCart());
+  }, []);
+
   const [carrito, setCarrito] = useState([]);
-  //const [mostrarForm, setMostrarForm] = useState(true);
+  const [totalCompra, setTotalCompra] = useState(null);
 
   const handleAgregar = (id) => {
-    const prodCar = db.filter((e) => e.id === id);
-    setCarrito([...carrito, ...prodCar]);
+    const addCart = products.filter((e) => e.id === id);
+    dispatch(addShoppingCart(addCart[0]));
+    localStorage.setItem("addPro", addCartS);
+    setCarrito([...carrito, ...addCart]);
   };
 
   carrito.sort((a, b) => (a.id > b.id ? 1 : -1));
@@ -22,7 +44,6 @@ const Productos = () => {
     const filtCarrTod = carrito.filter((item) => item.id !== producto.id);
     const carArmado = filtCarrTod.concat(filtCarr);
     setCarrito(carArmado);
-    document.getElementById("flotante").className = "invisible";
   };
 
   const handleMenos = (id) => {
@@ -31,8 +52,6 @@ const Productos = () => {
     const filtCarrTod = carrito.filter((item) => item.id !== id);
     const carArmado = filtCarrTod.concat(filtCarr);
     setCarrito(carArmado);
-    document.getElementById("flotante").className =
-      "container visible border border-primary mb-5";
   };
 
   const handleVaciarCarrito = () => {
@@ -42,6 +61,23 @@ const Productos = () => {
   const handleBorrarProducto = (id) => {
     const borrarProduc = carrito.filter((e) => e.id !== id);
     setCarrito([...borrarProduc]);
+  };
+
+  const handleCompraTotal = () => {
+    setTotalCompra(total.reduce((a, c) => a + c));
+    alert(`Valor de su compra: ${total.reduce((a, c) => a + c)}`);
+    document.getElementById("flotante").className =
+      "container visible border border-primary mb-5";
+  };
+
+  const handleCompraParcial = (id) => {
+    const itemProduct = carrito.filter((e) => e.id === id);
+    const totaltems = itemProduct.map((p) => p.precio);
+    const sumaTotalItemas = totaltems.reduce((a, c) => a + c);
+    setTotalCompra(sumaTotalItemas);
+    alert(`Valor de su compra: ${sumaTotalItemas}`);
+    document.getElementById("flotante").className =
+      "container visible border border-primary mb-5";
   };
 
   return (
@@ -57,27 +93,28 @@ const Productos = () => {
       </div>
       <h1>Productos</h1>
       <div className="border border-primary h-100 d-flex w-100 p-3 overflow-auto">
-        {db?.map((e, i) => {
-          return (
-            <div key={i} className="card bg-secondary m-3 col-md-4">
-              <div className="card-header">
-                <h3>{e.nombre}</h3>
+        {products &&
+          products?.map((e, i) => {
+            return (
+              <div key={i} className="card bg-secondary m-3 col-md-4">
+                <div className="card-header">
+                  <h3>{e.nombre}</h3>
+                </div>
+                <div className="card-body ">
+                  <h3>{`Id: ${e.id}`}</h3>
+                  <h3>{`Precio: ${e.precio}`}</h3>
+                  <h3 className="card-text">{e.descripcion}</h3>
+                </div>
+                <button className="btn btn-success">Comprar ahora</button>
+                <button
+                  onClick={() => handleAgregar(e.id)}
+                  className="btn btn-info"
+                >
+                  Agregar al carrito
+                </button>
               </div>
-              <div className="card-body ">
-                <h3>{`Id: ${e.id}`}</h3>
-                <h3>{`Precio: ${e.precio}`}</h3>
-                <h3 className="card-text">{e.descripcion}</h3>
-              </div>
-              <button className="btn btn-success">Comprar ahora</button>
-              <button
-                onClick={() => handleAgregar(e.id)}
-                className="btn btn-info"
-              >
-                Agregar al carrito
-              </button>
-            </div>
-          );
-        })}
+            );
+          })}
       </div>
       <div className="m-5">
         <table className="table table-hover border">
@@ -109,7 +146,9 @@ const Productos = () => {
                       <button onClick={() => handleMas(e)}>+</button>
                     </td>
                     <td>
-                      <button>Comprar</button>
+                      <button onClick={() => handleCompraParcial(e.id)}>
+                        Comprar
+                      </button>
                     </td>
                     <td>
                       <button onClick={() => handleBorrarProducto(e.id)}>
@@ -128,7 +167,7 @@ const Productos = () => {
                 {total.length > 0 ? total.reduce((a, c) => a + c) : 0}
               </th>
               <th scope="col">
-                <button>Comprar Todo</button>
+                <button onClick={handleCompraTotal}>Comprar Todo</button>
               </th>
               <th></th>
               <th>
@@ -142,7 +181,7 @@ const Productos = () => {
         <h1>Datos Cliente</h1>
         <div
           id="flotante"
-          className="container visible border border-primary mb-5"
+          className="container invisible border border-primary mb-5"
         >
           <form className="row g-3 mt-3">
             <div className="col-6">
@@ -215,8 +254,11 @@ const Productos = () => {
           </form>
         </div>
       </div>
+      <div>
+        <Stripe precio={totalCompra} />
+      </div>
     </div>
   );
 };
 
-export default Productos;
+export default Products;

@@ -1,24 +1,8 @@
-const express = require("express");
-const morgan = require("morgan");
-const routes = require("./src/routes/index.js");
+const server = require("./src/app.js");
+const { conn } = require("./src/db.js");
 
-const server = express();
-
-server.use(express.json());
-server.use(morgan("dev"));
-server.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*"); // update to match the domain you will make the request from
-  res.header("Access-Control-Allow-Credentials", "true");
-  res.header(
-    "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept"
-  );
-  res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
-  next();
-});
-
-server.use("/", routes);
-
-server.listen(3001, () => {
-  console.log("Servidor levantado en el puerto 3001");
+conn.sync({ force: false, alter: false }).then(async () => {
+  server.listen(3001, () => {
+    console.log("Servidor levantado en el puerto 3001");
+  });
 });

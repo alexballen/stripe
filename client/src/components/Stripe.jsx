@@ -1,13 +1,8 @@
 import React, { useState } from "react";
-import {
-  CardElement,
-  useStripe,
-  useElements,
-  CartElement,
-} from "@stripe/react-stripe-js";
+import { CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import axios from "axios";
 
-const Stripe = () => {
+const Stripe = ({ precio }) => {
   const stripe = useStripe();
   const elements = useElements();
   const [loading, setLoading] = useState(false);
@@ -21,23 +16,22 @@ const Stripe = () => {
     });
 
     if (!error) {
-      //setLoading(true);
-      const { id } = paymentMethod;
-      const { data } = await axios.post("http://localhost:3001/api/pagos", {
-        id,
-        amount: 10000,
-      });
+      setLoading(true);
+      try {
+        const { id } = paymentMethod;
+        const { data } = await axios.post("http://localhost:3001/api/pagos", {
+          id,
+          amount: precio,
+        });
+        console.log(data);
+        alert(data.message);
 
-      console.log(data);
-
-      elements.getElement(CardElement).clear();
-
-      /* try {
-       
+        elements.getElement(CardElement).clear();
       } catch (error) {
         console.log(error);
-      } */
-      //setLoading(false);
+      }
+
+      setLoading(false);
     }
   };
 

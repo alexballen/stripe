@@ -1,7 +1,8 @@
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
-import Productos from "./components/Productos";
-import Stripe from "./components/Stripe";
+import Products from "./components/Products";
+import ShoppingCart from "./components/ShoppingCart";
 import "./App.css";
 
 const stripePromise = loadStripe(
@@ -11,10 +12,14 @@ const stripePromise = loadStripe(
 function App() {
   return (
     <div className="App">
-      <Elements stripe={stripePromise}>
-        <Productos />
-        <Stripe />
-      </Elements>
+      <BrowserRouter>
+        <Elements stripe={stripePromise}>
+          <Routes>
+            <Route exact path="/" element={<Products />} />
+            <Route path="/cart" element={<ShoppingCart />} />
+          </Routes>
+        </Elements>
+      </BrowserRouter>
     </div>
   );
 }

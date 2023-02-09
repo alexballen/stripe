@@ -7,6 +7,7 @@ const stripe = new Stripe(
 const postStripe = async (req, res) => {
   try {
     const { id, amount } = req.body;
+    console.log(amount);
 
     await stripe.paymentIntents.create({
       amount,
