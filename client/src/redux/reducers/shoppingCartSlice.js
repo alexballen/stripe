@@ -3,18 +3,20 @@ import { createSlice } from "@reduxjs/toolkit";
 export const shoppingCartSlice = createSlice({
   name: "cart",
   initialState: {
-    addCartS: [],
-    cartP: [],
+    cart: [],
+    sortCart: [],
+    cant: [],
   },
   reducers: {
-    addCart: (state, action) => {
-      state.addCartS = [...state.addCartS, action.payload];
-      state.cartP = [...state.cartP, action.payload];
-    },
     getCart: (state, action) => {
-      const prodAdd = [...state.cartP];
-      console.log(prodAdd);
-      //state.cartP = [...prodAdd];
+      state.cant = action.payload;
+      state.sortCart = action.payload;
+      let hash = {};
+      const cartWithoutCopy = state.sortCart.filter((o) =>
+        hash[o.ref] ? false : (hash[o.ref] = true)
+      );
+      const order = cartWithoutCopy.sort((a, b) => (a.ref > b.ref ? 1 : -1));
+      state.cart = order;
     },
   },
 });

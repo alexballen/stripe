@@ -1,19 +1,25 @@
 import axios from "axios";
 import { getCart, addCart } from "../reducers/shoppingCartSlice.js";
 
-export const allShoppingCart = () => (dispatch) => {
-  dispatch(getCart());
+export const allShoppingCart = () => async (dispatch) => {
+  const int = await axios.get("http://localhost:3001/cart");
+  dispatch(getCart(int.data));
 };
 
-export const addShoppingCart = (data) => async (dispatch) => {
-  const { id } = data;
-  console.log(id);
-  await axios.post("http://localhost:3001/post", id);
-  /*  await axios({
-    method: "POST",
-    url: "/post",
-    data: data,
-  }).catch((error) => {
-    console.log(error);
-  }); */
+export const addShoppingCart = (data) => async () => {
+  await axios.post("http://localhost:3001/cart", data);
+};
+
+export const removeItemShoppingCart = (data) => async () => {
+  console.log(data);
+  await axios.delete("http://localhost:3001/cart/delitem", { data });
+};
+
+export const removeProductShoppingCart = (data) => async () => {
+  console.log(data);
+  await axios.delete("http://localhost:3001/cart/delproduct", { data });
+};
+
+export const removeCart = () => async () => {
+  await axios.delete("http://localhost:3001/cart/delcart");
 };

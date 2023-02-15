@@ -31,4 +31,4 @@ const articulos = [
   },
 ];
 
-export default articulos;
+module.exports = articulos;
