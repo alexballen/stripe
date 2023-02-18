@@ -3,68 +3,57 @@ import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { getAllProducts } from "../redux/actions/products.js";
 import {
-  addShoppingCart,
   allShoppingCart,
+  addShoppingCart,
+  editShoppingCart,
 } from "../redux/actions/shoppingCart.js";
-import db from "../db/db.js";
-import Stripe from "./Stripe";
+//import { fetchProducts } from "../redux/reducers/shoppingCartSlice.js";
+//import ShoppingCartIcon from "./ShoppingCartIcon.jsx";
+//import Cards from "./Cards.jsx";
 
 const Products = () => {
   const dispatch = useDispatch();
   const { products } = useSelector((state) => state.products);
+  const { cart } = useSelector((state) => state.cart);
+
+  const [carrito, setCarrito] = useState(0);
 
   useEffect(() => {
     dispatch(getAllProducts());
-  }, []);
-
-  const [carrito, setCarrito] = useState([]);
-  const [totalCompra, setTotalCompra] = useState(null);
-
-  const handleAgregar = (ref) => {
-    const addCart = products.filter((e) => e.ref === ref);
-    console.log(addCart);
-    dispatch(addShoppingCart(addCart[0]));
     dispatch(allShoppingCart());
-    setCarrito([...carrito, ...addCart]);
-  };
+  }, [dispatch]);
 
-  carrito.sort((a, b) => (a.id > b.id ? 1 : -1));
-
-  const carritoSinDuplicados = [...new Set([...carrito])];
-
-  const total = carrito.map((p) => p.precio);
-
-  const handleCompraTotal = () => {
-    setTotalCompra(total.reduce((a, c) => a + c));
-    alert(`Valor de su compra: ${total.reduce((a, c) => a + c)}`);
-    document.getElementById("flotante").className =
-      "container visible border border-primary mb-5";
-  };
-
-  const handleCompraParcial = (id) => {
-    const itemProduct = carrito.filter((e) => e.id === id);
-    const totaltems = itemProduct.map((p) => p.precio);
-    const sumaTotalItemas = totaltems.reduce((a, c) => a + c);
-    setTotalCompra(sumaTotalItemas);
-    alert(`Valor de su compra: ${sumaTotalItemas}`);
-    document.getElementById("flotante").className =
-      "container visible border border-primary mb-5";
+  const handleAgregar = (ref, id) => {
+    console.log(id);
+    const fetchProduct = products.filter((e) => e.ref === ref);
+    const fetchCart = cart.filter((e) => e.ref === ref);
+    if (fetchCart.length === 0) {
+      dispatch(addShoppingCart(fetchProduct[0])).then(() => {
+        dispatch(getAllProducts());
+      });
+      dispatch(editShoppingCart(id, { num: 1 }));
+    } else {
+      dispatch(editShoppingCart(id, { num: 1 }));
+    }
+    setCarrito(carrito + 1);
   };
 
   return (
     <div>
+      {/* <ShoppingCartIcon /> */}
       <div className="mt-5">
         <Link to="/cart">
           <button type="button" className="btn btn-primary position-relative">
             Carrito
             <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-              {carrito.length}
+              {carrito}
               <span className="visually-hidden">unread messages</span>
             </span>
           </button>
         </Link>
       </div>
       <h1>Productos</h1>
+      {/* <Cards /> */}
       <div className="border border-primary h-100 d-flex w-100 p-3 overflow-auto">
         {products &&
           products?.map((e, i) => {
@@ -80,7 +69,7 @@ const Products = () => {
                 </div>
                 <button className="btn btn-success">Comprar ahora</button>
                 <button
-                  onClick={() => handleAgregar(e.ref)}
+                  onClick={() => handleAgregar(e.ref, e.id)}
                   className="btn btn-info"
                 >
                   Agregar al carrito
@@ -165,9 +154,6 @@ const Products = () => {
             </div>
           </form>
         </div>
-      </div>
-      <div>
-        <Stripe precio={totalCompra} />
       </div>
     </div>
   );

@@ -3,29 +3,39 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   allShoppingCart,
   addShoppingCart,
-  removeItemShoppingCart,
+  decreaseShoppingCart,
   removeProductShoppingCart,
-  removeCart,
+  cleanShoppingCart,
 } from "../redux/actions/shoppingCart.js";
+//import Stripe from "./Stripe";
 
 const ShoppingCart = () => {
   const dispatch = useDispatch();
   const { cart } = useSelector((state) => state.cart);
   const { cant } = useSelector((state) => state.cant);
+  console.log(cart.cantidad);
 
-  const total = cant.map((p) => p.precio);
+  //const { status } = useSelector((state) => state.status);
+  //const { error } = useSelector((state) => state.error);
 
   const len = cant.length;
   const [num, setNum] = useState(len);
+  console.log(len);
+
+  const total = cant.map((p) => p.precio);
+  //const [totalCompra, setTotalCompra] = useState(null);
 
   useEffect(() => {
-    /* if (!cant.length) {
-      dispatch(allShoppingCart());
+    dispatch(allShoppingCart());
+    /* if (cart.length === 0) {
     } */
+  }, [dispatch]);
+
+  /*  useEffect(() => {
     if (cant.length !== num) {
       dispatch(allShoppingCart());
     }
-  }, [dispatch, cant]);
+  }, [cant]); */
 
   const handleMas = (product) => {
     dispatch(allShoppingCart());
@@ -35,7 +45,9 @@ const ShoppingCart = () => {
 
   const handleMenos = (ref) => {
     const delItem = cant.filter((e) => e.ref === ref);
-    dispatch(removeItemShoppingCart(delItem[0]));
+    dispatch(decreaseShoppingCart(delItem[0]));
+    dispatch(allShoppingCart());
+    setNum(num - 1);
   };
 
   const handleBorrarProducto = (ref) => {
@@ -44,9 +56,31 @@ const ShoppingCart = () => {
   };
 
   const handleVaciarCarrito = () => {
-    dispatch(removeCart());
+    dispatch(cleanShoppingCart());
   };
 
+  /* const handleCompraTotal = () => {
+    setTotalCompra(total.reduce((a, c) => a + c));
+    alert(`Valor de su compra: ${total.reduce((a, c) => a + c)}`);
+    document.getElementById("flotante").className =
+      "container visible border border-primary mb-5";
+  }; */
+
+  const handleCompraParcial = (id) => {
+    //const itemProduct = carrito.filter((e) => e.id === id);
+    //const totaltems = itemProduct.map((p) => p.precio);
+    //const sumaTotalItemas = totaltems.reduce((a, c) => a + c);
+    //setTotalCompra(sumaTotalItemas);
+    //alert(`Valor de su compra: ${sumaTotalItemas}`);
+    document.getElementById("flotante").className =
+      "container visible border border-primary mb-5";
+  };
+
+  /* if (status === "loading") {
+    return <div>Loading...</div>;
+  } else if (status === "failed") {
+    return <div>{error}</div>;
+  } */
   return (
     <div>
       <h1>ShoppingCart</h1>
@@ -74,9 +108,7 @@ const ShoppingCart = () => {
                     <td>{e.descripcion}</td>
                     <td>
                       <button onClick={() => handleMenos(e.ref)}>-</button>
-                      <button>
-                        {cant.filter((i) => i.ref === e.ref).length}
-                      </button>
+                      <button>{e.cantidad}</button>
                       <button onClick={() => handleMas(e)}>+</button>
                     </td>
                     <td>
@@ -105,12 +137,17 @@ const ShoppingCart = () => {
               </th>
               <th></th>
               <th>
-                <button onClick={handleVaciarCarrito}>Vaciar Carrito</button>
+                <button onClick={() => handleVaciarCarrito()}>
+                  Vaciar Carrito
+                </button>
               </th>
             </tr>
           </thead>
         </table>
       </div>
+      {/* <div>
+        <Stripe precio={totalCompra} />
+      </div> */}
     </div>
   );
 };

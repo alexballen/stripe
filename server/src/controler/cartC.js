@@ -12,15 +12,36 @@ const getCart = async (req, res) => {
 const postCart = async (req, res) => {
   const data = req.body;
   try {
-    const dt = await Cart.create({
-      ref: data.ref,
-      nombre: data.nombre,
-      precio: data.precio,
-      descripcion: data.descripcion,
-    });
-    res.status(200).json(dt);
+    if (data) {
+      const dt = await Cart.create({
+        id: data.id,
+        ref: data.ref,
+        nombre: data.nombre,
+        precio: data.precio,
+        cantidad: data.cantidad,
+        descripcion: data.descripcion,
+      });
+      res.status(200).json(dt);
+    }
   } catch (error) {
     console.log({ message: error });
+  }
+};
+
+const quantityCart = async (req, res) => {
+  const { id } = req.params;
+  const { num } = req.body;
+  try {
+    const existingCart = await Cart.findByPk(id);
+    if (existingCart) {
+      if (num) {
+        existingCart.cantidad = existingCart.cantidad + num;
+      }
+      await existingCart.save();
+    }
+    res.status(200).json(existingCart);
+  } catch (error) {
+    console.log({ message: error.message });
   }
 };
 
@@ -70,4 +91,5 @@ module.exports = {
   delItemCart,
   delProductCart,
   delCart,
+  quantityCart,
 };

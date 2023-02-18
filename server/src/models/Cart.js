@@ -4,7 +4,6 @@ module.exports = (sequelize) => {
   sequelize.define("cart", {
     id: {
       type: DataTypes.UUID,
-      defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
     },
     ref: {
@@ -14,6 +13,9 @@ module.exports = (sequelize) => {
       type: DataTypes.STRING,
     },
     precio: {
+      type: DataTypes.INTEGER,
+    },
+    cantidad: {
       type: DataTypes.INTEGER,
     },
     descripcion: {
