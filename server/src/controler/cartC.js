@@ -1,27 +1,40 @@
 const { Cart } = require("../db");
 
-const getCart = async (req, res) => {
+const getCartProducts = async (req, res) => {
   try {
-    const allCart = await Cart.findAll();
-    res.status(200).json(allCart);
+    const searchProductsCart = await Cart.findAll();
+    res.status(200).json(searchProductsCart);
   } catch (error) {
     console.log({ message: error });
   }
 };
 
-const postCart = async (req, res) => {
-  const data = req.body;
+const addCartProduct = async (req, res) => {
+  const { id } = req.params;
+  const { data, num, add } = req.body;
   try {
-    if (data) {
-      const dt = await Cart.create({
-        id: data.id,
-        ref: data.ref,
-        nombre: data.nombre,
-        precio: data.precio,
-        cantidad: data.cantidad,
-        descripcion: data.descripcion,
-      });
-      res.status(200).json(dt);
+    const existsProduct = await Cart.findByPk(id);
+    if (existsProduct) {
+      if (num) {
+        if (add === true) {
+          existsProduct.cantidad = existsProduct.cantidad + num;
+        }
+        await existsProduct.save();
+      }
+    } else {
+      if (data) {
+        const createInDb = await Cart.create({
+          id: data.id,
+          ref: data.ref,
+          nombre: data.nombre,
+          precio: data.precio,
+          cantidad: data.cantidad,
+          descripcion: data.descripcion,
+        });
+        createInDb.cantidad = createInDb.cantidad + num;
+        await createInDb.save();
+        res.status(200).json(createInDb);
+      }
     }
   } catch (error) {
     console.log({ message: error });
@@ -30,41 +43,39 @@ const postCart = async (req, res) => {
 
 const quantityCart = async (req, res) => {
   const { id } = req.params;
-  const { num } = req.body;
+  const { num, add } = req.body;
   try {
-    const existingCart = await Cart.findByPk(id);
-    if (existingCart) {
+    const existsProduct = await Cart.findByPk(id);
+    if (existsProduct) {
       if (num) {
-        existingCart.cantidad = existingCart.cantidad + num;
+        if (add === true) {
+          existsProduct.cantidad = existsProduct.cantidad + num;
+        } else {
+          if (existsProduct.cantidad === 1) {
+            await Cart.destroy({
+              where: {
+                id: id,
+              },
+            });
+          } else {
+            existsProduct.cantidad = existsProduct.cantidad - num;
+          }
+        }
+        await existsProduct.save();
       }
-      await existingCart.save();
     }
-    res.status(200).json(existingCart);
+    res.status(200).json(existsProduct);
   } catch (error) {
     console.log({ message: error.message });
   }
 };
 
-const delItemCart = async (req, res) => {
-  const data = req.body;
+const deleteCartProduct = async (req, res) => {
+  const { id } = req.params;
   try {
     await Cart.destroy({
       where: {
-        id: data.id,
-      },
-    });
-    res.status(204).json("Menos un items del carrito");
-  } catch (error) {
-    console.log({ message: error });
-  }
-};
-
-const delProductCart = async (req, res) => {
-  const data = req.body;
-  try {
-    await Cart.destroy({
-      where: {
-        ref: data.ref,
+        id,
       },
     });
     res.status(204).json("Producto eliminado con exito del carrito");
@@ -73,23 +84,30 @@ const delProductCart = async (req, res) => {
   }
 };
 
-const delCart = async (req, res) => {
+const cleanCart = async (req, res) => {
   try {
-    await Cart.destroy({
-      where: {},
-      truncate: true,
-    });
-    res.status(204).json("Carrito vaciado");
+    const existsProducts = await Cart.findAll();
+    console.log(existsProducts);
+    if (existsProducts.length !== 0) {
+      await Cart.destroy({
+        where: {},
+        truncate: true,
+      });
+      return res
+        .status(204)
+        .json("Se eliminaron todos los productos del carrito");
+    } else {
+      return res.status(204).json("No hay productos para eliminar");
+    }
   } catch (error) {
     console.log({ message: error });
   }
 };
 
 module.exports = {
-  getCart,
-  postCart,
-  delItemCart,
-  delProductCart,
-  delCart,
+  getCartProducts,
+  addCartProduct,
   quantityCart,
+  deleteCartProduct,
+  cleanCart,
 };

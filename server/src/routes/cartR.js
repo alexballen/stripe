@@ -1,20 +1,18 @@
 const { Router } = require("express");
 const {
-  getCart,
-  postCart,
-  delItemCart,
-  delProductCart,
-  delCart,
+  getCartProducts,
+  addCartProduct,
   quantityCart,
+  deleteCartProduct,
+  cleanCart,
 } = require("../controler/cartC.js");
 
 const router = Router();
 
-router.get("/", getCart);
-router.post("/", postCart);
+router.get("/", getCartProducts);
+router.post("/:id", addCartProduct);
 router.patch("/:id", quantityCart);
-router.delete("/delitem", delItemCart);
-router.delete("/delproduct", delProductCart);
-router.delete("/delcart", delCart);
+router.delete("/cleancart", cleanCart);
+router.delete("/:id", deleteCartProduct);
 
 module.exports = router;

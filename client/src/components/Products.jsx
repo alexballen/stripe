@@ -4,12 +4,9 @@ import { Link } from "react-router-dom";
 import { getAllProducts } from "../redux/actions/products.js";
 import {
   allShoppingCart,
-  addShoppingCart,
   editShoppingCart,
+  postShoppingCart,
 } from "../redux/actions/shoppingCart.js";
-//import { fetchProducts } from "../redux/reducers/shoppingCartSlice.js";
-//import ShoppingCartIcon from "./ShoppingCartIcon.jsx";
-//import Cards from "./Cards.jsx";
 
 const Products = () => {
   const dispatch = useDispatch();
@@ -23,17 +20,17 @@ const Products = () => {
     dispatch(allShoppingCart());
   }, [dispatch]);
 
-  const handleAgregar = (ref, id) => {
-    console.log(id);
+  const handleAdd = (ref, id) => {
     const fetchProduct = products.filter((e) => e.ref === ref);
     const fetchCart = cart.filter((e) => e.ref === ref);
     if (fetchCart.length === 0) {
-      dispatch(addShoppingCart(fetchProduct[0])).then(() => {
-        dispatch(getAllProducts());
+      dispatch(
+        postShoppingCart(id, { data: fetchProduct[0], num: 1, add: true })
+      ).then(() => {
+        dispatch(allShoppingCart());
       });
-      dispatch(editShoppingCart(id, { num: 1 }));
     } else {
-      dispatch(editShoppingCart(id, { num: 1 }));
+      dispatch(editShoppingCart(id, { num: 1, add: true }));
     }
     setCarrito(carrito + 1);
   };
@@ -69,7 +66,7 @@ const Products = () => {
                 </div>
                 <button className="btn btn-success">Comprar ahora</button>
                 <button
-                  onClick={() => handleAgregar(e.ref, e.id)}
+                  onClick={() => handleAdd(e.ref, e.id)}
                   className="btn btn-info"
                 >
                   Agregar al carrito
