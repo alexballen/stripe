@@ -11,13 +11,13 @@ const getCartProducts = async (req, res) => {
 
 const addCartProduct = async (req, res) => {
   const { id } = req.params;
-  const { data, num, add } = req.body;
+  const { data, quantity, add } = req.body;
   try {
     const existsProduct = await Cart.findByPk(id);
     if (existsProduct) {
-      if (num) {
+      if (quantity) {
         if (add === true) {
-          existsProduct.cantidad = existsProduct.cantidad + num;
+          existsProduct.cantidad = existsProduct.cantidad + quantity;
         }
         await existsProduct.save();
       }
@@ -31,7 +31,7 @@ const addCartProduct = async (req, res) => {
           cantidad: data.cantidad,
           descripcion: data.descripcion,
         });
-        createInDb.cantidad = createInDb.cantidad + num;
+        createInDb.cantidad = createInDb.cantidad + quantity;
         await createInDb.save();
         res.status(200).json(createInDb);
       }
@@ -43,13 +43,13 @@ const addCartProduct = async (req, res) => {
 
 const quantityCart = async (req, res) => {
   const { id } = req.params;
-  const { num, add } = req.body;
+  const { quantity, add } = req.body;
   try {
     const existsProduct = await Cart.findByPk(id);
     if (existsProduct) {
-      if (num) {
+      if (quantity) {
         if (add === true) {
-          existsProduct.cantidad = existsProduct.cantidad + num;
+          existsProduct.cantidad = existsProduct.cantidad + quantity;
         } else {
           if (existsProduct.cantidad === 1) {
             await Cart.destroy({
@@ -58,7 +58,7 @@ const quantityCart = async (req, res) => {
               },
             });
           } else {
-            existsProduct.cantidad = existsProduct.cantidad - num;
+            existsProduct.cantidad = existsProduct.cantidad - quantity;
           }
         }
         await existsProduct.save();
@@ -87,7 +87,6 @@ const deleteCartProduct = async (req, res) => {
 const cleanCart = async (req, res) => {
   try {
     const existsProducts = await Cart.findAll();
-    console.log(existsProducts);
     if (existsProducts.length !== 0) {
       await Cart.destroy({
         where: {},
