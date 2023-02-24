@@ -16,36 +16,36 @@ const ShoppingCart = () => {
   const { cart } = useSelector((state) => state.cart);
 
   const total = cart.map((product) => product.precio);
-  const cantidadTotal = cart.map((product) => product.cantidad);
+  const totalQuantity = cart.map((product) => product.cantidad);
 
-  const [totalCompra, setTotalCompra] = useState(null);
+  const [totalPurchaseCost, setTotalPurchaseCost] = useState(null);
 
   useEffect(() => {
     dispatch(allProductsCart());
   }, [dispatch]);
 
-  const handleMas = (id) => {
+  const handleAdd = (id) => {
     dispatch(addProductShoppingCart(id, { quantity: 1, add: true }));
   };
 
-  const handleMenos = (id) => {
+  const handleRemove = (id) => {
     dispatch(decreaseProductShoppingCart(id, { quantity: 1, add: false }));
   };
 
-  const handleBorrarProducto = (id) => {
+  const handleDeleteProduct = (id) => {
     dispatch(removeProductShoppingCart(id));
     document.getElementById("flotante").className = "invisible";
     document.getElementById("flotanteDos").className = "invisible";
   };
 
-  const handleVaciarCarrito = () => {
+  const handleCleanCart = () => {
     dispatch(cleanShoppingCart());
     document.getElementById("flotante").className = "invisible";
     document.getElementById("flotanteDos").className = "invisible";
   };
 
-  const handleCompraParcial = (total) => {
-    setTotalCompra(total);
+  const handlePartialPurchase = (total) => {
+    setTotalPurchaseCost(total);
     // alert(`Valor de su compra: ${sumaTotalItemas}`);
     document.getElementById("flotante").className = "visible";
     document.getElementById("flotanteDos").className = "visible";
@@ -53,8 +53,8 @@ const ShoppingCart = () => {
 
   //"container visible border border-primary mb-5"
 
-  const handleCompraTotal = (total) => {
-    setTotalCompra(total.reduce((a, c) => a + c));
+  const handleTotalPurchase = (total) => {
+    setTotalPurchaseCost(total.reduce((a, c) => a + c));
     //alert(`Valor de su compra: ${total.reduce((a, c) => a + c)}`);
     document.getElementById("flotante").className = "visible";
     document.getElementById("flotanteDos").className = "visible";
@@ -85,21 +85,21 @@ const ShoppingCart = () => {
                   <td>{product.precio}</td>
                   <td>{product.descripcion}</td>
                   <td>
-                    <button onClick={() => handleMenos(product.id)}>-</button>
+                    <button onClick={() => handleRemove(product.id)}>-</button>
                     <button>{product.cantidad}</button>
-                    <button onClick={() => handleMas(product.id)}>+</button>
+                    <button onClick={() => handleAdd(product.id)}>+</button>
                   </td>
                   <td>
                     <button
                       onClick={() =>
-                        handleCompraParcial(product.precio * product.cantidad)
+                        handlePartialPurchase(product.precio * product.cantidad)
                       }
                     >
                       Comprar {product.precio * product.cantidad}
                     </button>
                   </td>
                   <td>
-                    <button onClick={() => handleBorrarProducto(product.id)}>
+                    <button onClick={() => handleDeleteProduct(product.id)}>
                       Borrar
                     </button>
                   </td>
@@ -113,13 +113,13 @@ const ShoppingCart = () => {
               <th scope="col">Total</th>
               <th scope="col">
                 {cart.length > 0
-                  ? SumCartItems(total, cantidadTotal).reduce((a, b) => a + b)
+                  ? SumCartItems(total, totalQuantity).reduce((a, b) => a + b)
                   : 0}
               </th>
               <th scope="col">
                 <button
                   onClick={() =>
-                    handleCompraTotal(SumCartItems(total, cantidadTotal))
+                    handleTotalPurchase(SumCartItems(total, totalQuantity))
                   }
                 >
                   Comprar Todo
@@ -127,7 +127,7 @@ const ShoppingCart = () => {
               </th>
               <th></th>
               <th>
-                <button onClick={() => handleVaciarCarrito()}>
+                <button onClick={() => handleCleanCart()}>
                   Vaciar Carrito
                 </button>
               </th>
@@ -139,7 +139,7 @@ const ShoppingCart = () => {
         <FormClient />
       </div>
       <div id="flotanteDos" className="invisible">
-        <Stripe precio={totalCompra} />
+        <Stripe precio={totalPurchaseCost} />
       </div>
     </div>
   );

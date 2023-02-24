@@ -19,7 +19,7 @@ const Stripe = ({ precio }) => {
       setLoading(true);
       try {
         const { id } = paymentMethod;
-        const { data } = await axios.post("http://localhost:3001/api/pagos", {
+        const { data } = await axios.post("http://localhost:3001/pay", {
           id,
           amount: precio,
         });
