@@ -4,39 +4,52 @@ const shoppingCartSlice = createSlice({
   name: "cart",
   initialState: {
     cart: [],
+    cartIcon: 0,
   },
   reducers: {
-    getCart: (state, action) => {
+    getCartProducts: (state, action) => {
       state.cart = action.payload;
     },
-    sumCart: (state, action) => {
-      const existingItem = state.cart.find((i) => i.id === action.payload);
-      if (existingItem) {
-        existingItem.cantidad++;
+
+    addCartProduct: (state, action) => {
+      const id = action.payload;
+      const existsProduct = state.cart.find((product) => product.id === id);
+      if (existsProduct) {
+        existsProduct.cantidad++;
       }
     },
-    resCart: (state, action) => {
-      const existingItem = state.cart.find((e) => e.id === action.payload);
-      if (existingItem.cantidad === 1) {
-        state.cart = state.cart.filter((i) => i.id !== action.payload);
+
+    removeCartProduct: (state, action) => {
+      const id = action.payload;
+      const existsProduct = state.cart.find((product) => product.id === id);
+      if (existsProduct.cantidad === 1) {
+        state.cart = state.cart.filter((product) => product.id !== id);
       } else {
-        existingItem.cantidad--;
+        existsProduct.cantidad--;
       }
     },
-    decreaseCart: (state, action) => {
-      console.log(action.payload);
+
+    removeCartReference: (state, action) => {
+      const id = action.payload;
+      state.cart = state.cart.filter((product) => product.id !== id);
     },
-    delProdCart: (state, action) => {
-      console.log(action.payload);
-      const delItemCart = state.cart.filter((e) => e.id !== action.payload);
-      state.cart = delItemCart;
-    },
-    delCart: (state, action) => {
+
+    cleanCart: (state, action) => {
       state.cart = [];
+    },
+
+    addQuantityCart: (state, action) => {
+      state.cartIcon = action.payload;
     },
   },
 });
 
-export const { getCart, sumCart, resCart, decreaseCart, delProdCart, delCart } =
-  shoppingCartSlice.actions;
+export const {
+  getCartProducts,
+  addCartProduct,
+  removeCartProduct,
+  removeCartReference,
+  cleanCart,
+  addQuantityCart,
+} = shoppingCartSlice.actions;
 export default shoppingCartSlice.reducer;

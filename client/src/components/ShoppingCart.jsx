@@ -1,67 +1,64 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  allShoppingCart,
-  decreaseShoppingCart,
+  allProductsCart,
+  addProductShoppingCart,
+  decreaseProductShoppingCart,
   removeProductShoppingCart,
   cleanShoppingCart,
-  editShoppingCart,
 } from "../redux/actions/shoppingCart.js";
 import Stripe from "./Stripe";
+import FormClient from "./FormClient.jsx";
+import SumCartItems from "./SumCartItems.jsx";
 
 const ShoppingCart = () => {
   const dispatch = useDispatch();
   const { cart } = useSelector((state) => state.cart);
 
-  const total = cart.map((pre) => pre.precio);
-  const cantidadTotal = cart.map((cant) => cant.cantidad);
+  const total = cart.map((product) => product.precio);
+  const cantidadTotal = cart.map((product) => product.cantidad);
 
-  const suma = (arr1, arr2) => {
-    const sumaTotal = [];
-    for (let i = 0; i < arr1.length; i++) {
-      sumaTotal[i] = arr1[i] * arr2[i];
-    }
-    return sumaTotal;
-  };
-
-  //const [totalCompra, setTotalCompra] = useState(null);
+  const [totalCompra, setTotalCompra] = useState(null);
 
   useEffect(() => {
-    dispatch(allShoppingCart());
+    dispatch(allProductsCart());
   }, [dispatch]);
 
   const handleMas = (id) => {
-    dispatch(editShoppingCart(id, { num: 1, add: true }));
+    dispatch(addProductShoppingCart(id, { quantity: 1, add: true }));
   };
 
   const handleMenos = (id) => {
-    dispatch(decreaseShoppingCart(id, { num: 1, add: false }));
+    dispatch(decreaseProductShoppingCart(id, { quantity: 1, add: false }));
   };
 
   const handleBorrarProducto = (id) => {
     dispatch(removeProductShoppingCart(id));
+    document.getElementById("flotante").className = "invisible";
+    document.getElementById("flotanteDos").className = "invisible";
   };
 
   const handleVaciarCarrito = () => {
     dispatch(cleanShoppingCart());
+    document.getElementById("flotante").className = "invisible";
+    document.getElementById("flotanteDos").className = "invisible";
   };
 
-  /* const handleCompraTotal = () => {
-    setTotalCompra(total.reduce((a, c) => a + c));
-    alert(`Valor de su compra: ${total.reduce((a, c) => a + c)}`);
-    document.getElementById("flotante").className =
-      "container visible border border-primary mb-5";
-  }; */
+  const handleCompraParcial = (total) => {
+    setTotalCompra(total);
+    // alert(`Valor de su compra: ${sumaTotalItemas}`);
+    document.getElementById("flotante").className = "visible";
+    document.getElementById("flotanteDos").className = "visible";
+  };
 
-  /* const handleCompraParcial = (id) => {
-    //const itemProduct = carrito.filter((e) => e.id === id);
-    //const totaltems = itemProduct.map((p) => p.precio);
-    //const sumaTotalItemas = totaltems.reduce((a, c) => a + c);
-    //setTotalCompra(sumaTotalItemas);
-    //alert(`Valor de su compra: ${sumaTotalItemas}`);
-    document.getElementById("flotante").className =
-      "container visible border border-primary mb-5";
-  }; */
+  //"container visible border border-primary mb-5"
+
+  const handleCompraTotal = (total) => {
+    setTotalCompra(total.reduce((a, c) => a + c));
+    //alert(`Valor de su compra: ${total.reduce((a, c) => a + c)}`);
+    document.getElementById("flotante").className = "visible";
+    document.getElementById("flotanteDos").className = "visible";
+  };
 
   return (
     <div>
@@ -79,26 +76,30 @@ const ShoppingCart = () => {
               <th scope="col">Borrar producto</th>
             </tr>
           </thead>
-          {cart?.map((e, i) => {
+          {cart?.map((product, i) => {
             return (
               <tbody key={i}>
                 <tr className="table-primary">
                   <th scope="row">{i + 1}</th>
-                  <td>{e.nombre}</td>
-                  <td>{e.precio}</td>
-                  <td>{e.descripcion}</td>
+                  <td>{product.nombre}</td>
+                  <td>{product.precio}</td>
+                  <td>{product.descripcion}</td>
                   <td>
-                    <button onClick={() => handleMenos(e.id)}>-</button>
-                    <button>{e.cantidad}</button>
-                    <button onClick={() => handleMas(e.id)}>+</button>
+                    <button onClick={() => handleMenos(product.id)}>-</button>
+                    <button>{product.cantidad}</button>
+                    <button onClick={() => handleMas(product.id)}>+</button>
                   </td>
                   <td>
-                    <button /* onClick={() => handleCompraParcial(e.id)} */>
-                      Comprar {e.precio * e.cantidad}
+                    <button
+                      onClick={() =>
+                        handleCompraParcial(product.precio * product.cantidad)
+                      }
+                    >
+                      Comprar {product.precio * product.cantidad}
                     </button>
                   </td>
                   <td>
-                    <button onClick={() => handleBorrarProducto(e.id)}>
+                    <button onClick={() => handleBorrarProducto(product.id)}>
                       Borrar
                     </button>
                   </td>
@@ -112,11 +113,17 @@ const ShoppingCart = () => {
               <th scope="col">Total</th>
               <th scope="col">
                 {cart.length > 0
-                  ? suma(total, cantidadTotal).reduce((a, b) => a + b)
+                  ? SumCartItems(total, cantidadTotal).reduce((a, b) => a + b)
                   : 0}
               </th>
               <th scope="col">
-                <button /* onClick={handleCompraTotal} */>Comprar Todo</button>
+                <button
+                  onClick={() =>
+                    handleCompraTotal(SumCartItems(total, cantidadTotal))
+                  }
+                >
+                  Comprar Todo
+                </button>
               </th>
               <th></th>
               <th>
@@ -128,9 +135,12 @@ const ShoppingCart = () => {
           </thead>
         </table>
       </div>
-      {/* <div>
+      <div id="flotante" className="invisible">
+        <FormClient />
+      </div>
+      <div id="flotanteDos" className="invisible">
         <Stripe precio={totalCompra} />
-      </div> */}
+      </div>
     </div>
   );
 };

@@ -1,43 +1,48 @@
 import axios from "axios";
 import {
-  getCart,
-  sumCart,
-  resCart,
-  delProdCart,
-  delCart,
+  getCartProducts,
+  addCartProduct,
+  removeCartProduct,
+  removeCartReference,
+  cleanCart,
+  addQuantityCart,
 } from "../reducers/shoppingCartSlice.js";
 
-export const allShoppingCart = () => async (dispatch) => {
+export const allProductsCart = () => async (dispatch) => {
   const { data } = await axios.get("http://localhost:3001/cart");
-  dispatch(getCart(data));
+  dispatch(getCartProducts(data));
 };
 
 export const postShoppingCart = (id, data) => async () => {
   await axios.post(`http://localhost:3001/cart/${id}`, data);
 };
 
-export const editShoppingCart = (id, quantity) => async (dispatch) => {
+export const addProductShoppingCart = (id, data) => async (dispatch) => {
   await axios
-    .patch(`http://localhost:3001/cart/${id}`, quantity)
-    .then((response) => dispatch(sumCart(id)))
+    .patch(`http://localhost:3001/cart/${id}`, data)
+    .then((response) => dispatch(addCartProduct(id)))
     .catch((error) => console.log(error));
 };
 
-export const decreaseShoppingCart = (id, quantity) => async (dispatch) => {
+export const decreaseProductShoppingCart = (id, data) => async (dispatch) => {
   await axios
-    .patch(`http://localhost:3001/cart/${id}`, quantity)
-    .then((response) => dispatch(resCart(id)))
+    .patch(`http://localhost:3001/cart/${id}`, data)
+    .then((response) => dispatch(removeCartProduct(id)))
     .catch((error) => console.log(error));
 };
 
 export const removeProductShoppingCart = (id) => async (dispatch) => {
   await axios
     .delete(`http://localhost:3001/cart/${id}`)
-    .then((response) => dispatch(delProdCart(id)))
+    .then((response) => dispatch(removeCartReference(id)))
     .catch((error) => console.log(error));
 };
 
 export const cleanShoppingCart = () => async (dispatch) => {
   await axios.delete("http://localhost:3001/cart/cleancart");
-  dispatch(delCart());
+  dispatch(cleanCart());
+};
+
+export const addToShoppingCartIcon = (quantity) => (dispatch) => {
+  dispatch(addQuantityCart(quantity));
 };
